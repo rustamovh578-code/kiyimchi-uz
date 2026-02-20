@@ -1,0 +1,172 @@
+/* ========================================
+   ProfilePage Styles
+   ======================================== */
+
+.profile {
+    padding: var(--space-8) 0 var(--space-16);
+}
+
+.profile__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-8);
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+    border-radius: var(--radius-2xl);
+    margin-bottom: var(--space-10);
+}
+
+.profile__user {
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
+}
+
+.profile__avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--color-white);
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.profile__name {
+    font-size: var(--text-2xl);
+    color: var(--color-white);
+}
+
+.profile__phone {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: var(--text-sm);
+}
+
+.profile__header .btn {
+    color: var(--color-white);
+    background: rgba(255, 255, 255, 0.15);
+    border: 1.5px solid rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(4px);
+    font-weight: var(--font-semibold);
+    padding: var(--space-2) var(--space-5);
+    border-radius: var(--radius-lg);
+    transition: all var(--transition-base);
+}
+
+.profile__header .btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.6);
+}
+
+.profile__section-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-xl);
+    margin-bottom: var(--space-6);
+}
+
+.profile__orders {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+/* Order Card */
+.order-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    padding: var(--space-5);
+    transition: all var(--transition-base);
+}
+
+.order-card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.order-card__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-4);
+}
+
+.order-card__id {
+    font-family: var(--font-display);
+    font-weight: var(--font-bold);
+    font-size: var(--text-base);
+    margin-right: var(--space-3);
+}
+
+.order-card__date {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    font-size: var(--text-sm);
+    color: var(--text-tertiary);
+}
+
+.order-card__items {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-4);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-4);
+}
+
+.order-card__item-name {
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+}
+
+.order-card__item-meta {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+    margin-left: var(--space-2);
+}
+
+.order-card__footer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.order-card__address {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-sm);
+    color: var(--text-tertiary);
+}
+
+.order-card__bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.order-card__payment {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+}
+
+.order-card__total {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
+    color: var(--color-primary);
+}
+
+@media (max-width: 768px) {
+    .profile__header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-4);
+    }
+}

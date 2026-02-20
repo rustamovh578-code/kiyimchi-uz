@@ -1,0 +1,110 @@
+/* ========================================
+   LoginPage Styles
+   ======================================== */
+
+.login-page {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-8);
+}
+
+.login-page__container {
+    width: 100%;
+    max-width: 440px;
+}
+
+.login-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-2xl);
+    padding: var(--space-10);
+    box-shadow: var(--shadow-xl);
+}
+
+.login-card__header {
+    text-align: center;
+    margin-bottom: var(--space-8);
+}
+
+.login-card__logo {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-weight: var(--font-bold);
+    color: var(--text-primary);
+    text-decoration: none;
+    margin-bottom: var(--space-6);
+}
+
+.login-card__logo-accent {
+    color: var(--color-primary);
+}
+
+.login-card__header h2 {
+    font-size: var(--text-2xl);
+    margin-bottom: var(--space-2);
+}
+
+.login-card__header p {
+    color: var(--text-tertiary);
+    font-size: var(--text-sm);
+}
+
+.login-card__form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.login-card__password-wrapper {
+    position: relative;
+}
+
+.login-card__password-wrapper .input {
+    width: 100%;
+    padding-right: 48px;
+}
+
+.login-card__password-toggle {
+    position: absolute;
+    right: var(--space-3);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-tertiary);
+    padding: var(--space-1);
+}
+
+.login-card__submit {
+    width: 100%;
+    margin-top: var(--space-2);
+}
+
+.login-card__footer {
+    text-align: center;
+    margin-top: var(--space-6);
+    font-size: var(--text-sm);
+    color: var(--text-tertiary);
+}
+
+.login-card__switch {
+    color: var(--color-primary);
+    font-weight: var(--font-semibold);
+}
+
+.login-card__switch:hover {
+    text-decoration: underline;
+}
+
+.login-card__hint {
+    margin-top: var(--space-6);
+    padding: var(--space-3) var(--space-4);
+    background: var(--color-primary-50);
+    border-radius: var(--radius-lg);
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+    text-align: center;
+}
