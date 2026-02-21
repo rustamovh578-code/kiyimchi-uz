@@ -6,23 +6,30 @@ import './LoginPage.css';
 
 export default function LoginPage() {
     const navigate = useNavigate();
-    const { login, register } = useAuth();
+    const { login, register, loading } = useAuth();
     const [isRegister, setIsRegister] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [form, setForm] = useState({ name: '', phone: '', password: '' });
+    const [error, setError] = useState('');
 
     const handleChange = (e) => {
         setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+        setError('');
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (isRegister) {
-            register(form.name, form.phone, form.password);
-        } else {
-            login(form.phone, form.password);
+        setError('');
+        try {
+            if (isRegister) {
+                await register(form.name, form.phone, form.password);
+            } else {
+                await login(form.phone, form.password);
+            }
+            navigate('/');
+        } catch (err) {
+            setError(err.message || 'Xatolik yuz berdi');
         }
-        navigate('/');
     };
 
     return (
@@ -39,6 +46,7 @@ export default function LoginPage() {
                     </div>
 
                     <form className="login-card__form" onSubmit={handleSubmit}>
+                        {error && <div className="login-card__error" style={{ color: '#e74c3c', background: '#fdf0ef', padding: '10px 14px', borderRadius: '8px', fontSize: '0.9rem', marginBottom: '8px' }}>{error}</div>}
                         {isRegister && (
                             <div className="input-group">
                                 <label htmlFor="name">Ismingiz</label>

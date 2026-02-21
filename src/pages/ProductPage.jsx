@@ -1,22 +1,47 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ShoppingBag, Heart, ChevronLeft, ChevronRight, Star, Minus, Plus, Truck, RotateCcw, Shield } from 'lucide-react';
-import { getProductById, formatPrice, getDiscountPercent, getProductsByCategory } from '../data/products';
+import { productsAPI } from '../services/api';
 import { useCart } from '../context/CartContext';
 import ProductCard from '../components/product/ProductCard';
 import './ProductPage.css';
 
+const formatPrice = (price) => new Intl.NumberFormat('uz-UZ').format(price) + " so'm";
+const getDiscountPercent = (oldPrice, price) => oldPrice ? Math.round((1 - price / oldPrice) * 100) : 0;
+
 export default function ProductPage() {
     const { id } = useParams();
     const navigate = useNavigate();
-    const product = getProductById(id);
     const { addToCart } = useCart();
+    const [product, setProduct] = useState(null);
+    const [relatedProducts, setRelatedProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     const [selectedImage, setSelectedImage] = useState(0);
     const [selectedSize, setSelectedSize] = useState('');
     const [selectedColor, setSelectedColor] = useState(0);
     const [quantity, setQuantity] = useState(1);
     const [addedToCart, setAddedToCart] = useState(false);
+
+    useEffect(() => {
+        setLoading(true);
+        setSelectedImage(0);
+        setSelectedSize('');
+        setSelectedColor(0);
+        setQuantity(1);
+        productsAPI.getById(id)
+            .then(data => {
+                setProduct(data);
+                return productsAPI.getAll({ category: data.category });
+            })
+            .then(related => setRelatedProducts(related.filter(p => p.id !== Number(id)).slice(0, 4)))
+            .catch(console.error)
+            .finally(() => setLoading(false));
+    }, [id]);
+
+    if (loading) {
+        return <div className="container" style={{ padding: '4rem 0', textAlign: 'center' }}><p>Yuklanmoqda...</p></div>;
+    }
 
     if (!product) {
         return (
@@ -27,8 +52,8 @@ export default function ProductPage() {
         );
     }
 
-    const discount = getDiscountPercent(product.oldPrice, product.price);
-    const relatedProducts = getProductsByCategory(product.category).filter(p => p.id !== product.id).slice(0, 4);
+    const discount = getDiscountPercent(product.oldPrice || product.old_price, product.price);
+    const colorNames = product.colorNames || product.color_names || [];
 
     const handleAddToCart = () => {
         if (!selectedSize) {
@@ -41,7 +66,7 @@ export default function ProductPage() {
             image: product.images[0],
             price: product.price,
             size: selectedSize,
-            color: product.colorNames[selectedColor],
+            color: colorNames[selectedColor],
             quantity,
         });
         setAddedToCart(true);
@@ -123,7 +148,7 @@ export default function ProductPage() {
 
                         {/* Color Selector */}
                         <div className="product-selector">
-                            <h4 className="product-selector__title">Rang: <span>{product.colorNames[selectedColor]}</span></h4>
+                            <h4 className="product-selector__title">Rang: <span>{colorNames[selectedColor]}</span></h4>
                             <div className="product-selector__colors">
                                 {product.colors.map((color, i) => (
                                     <button

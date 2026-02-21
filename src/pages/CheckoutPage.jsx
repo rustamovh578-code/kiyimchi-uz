@@ -3,8 +3,10 @@ import { useNavigate, Link } from 'react-router-dom';
 import { MapPin, CreditCard, Check } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { formatPrice } from '../data/products';
+import { ordersAPI } from '../services/api';
 import './CheckoutPage.css';
+
+const formatPrice = (price) => new Intl.NumberFormat('uz-UZ').format(price) + " so'm";
 
 const regions = [
     'Toshkent shahri', "Toshkent viloyati", 'Samarqand', 'Buxoro', 'Farg\'ona',
@@ -17,6 +19,7 @@ export default function CheckoutPage() {
     const { cart, cartTotal, deliveryFee, clearCart } = useCart();
     const { isAuthenticated, user } = useAuth();
     const [orderPlaced, setOrderPlaced] = useState(false);
+    const [orderId, setOrderId] = useState('');
 
     const [form, setForm] = useState({
         name: user?.name || '',
@@ -32,14 +35,36 @@ export default function CheckoutPage() {
         setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (!form.name || !form.phone || !form.region || !form.address) {
             alert("Iltimos, barcha majburiy maydonlarni to'ldiring");
             return;
         }
-        setOrderPlaced(true);
-        clearCart();
+        try {
+            const fullAddress = `${form.region}, ${form.district ? form.district + ', ' : ''}${form.address}`;
+            const result = await ordersAPI.create({
+                items: cart.map(item => ({
+                    productId: item.productId,
+                    name: item.name,
+                    size: item.size,
+                    color: item.color,
+                    quantity: item.quantity,
+                    price: item.price,
+                })),
+                totalAmount: cartTotal,
+                deliveryFee,
+                paymentMethod: form.paymentMethod,
+                address: fullAddress,
+                phone: form.phone,
+                customerName: form.name,
+            });
+            setOrderId(result.id || '');
+            setOrderPlaced(true);
+            clearCart();
+        } catch (err) {
+            alert(err.message || 'Buyurtma berishda xatolik yuz berdi');
+        }
     };
 
     if (orderPlaced) {
@@ -52,7 +77,7 @@ export default function CheckoutPage() {
                         </div>
                         <h2>Buyurtma qabul qilindi! ✅</h2>
                         <p>Buyurtmangiz muvaffaqiyatli rasmiylashtirildi. Tez orada siz bilan bog'lanamiz.</p>
-                        <p className="checkout-success__order-id">Buyurtma raqami: KUZ-{String(Date.now()).slice(-6)}</p>
+                        <p className="checkout-success__order-id">Buyurtma raqami: {orderId}</p>
                         <div className="checkout-success__actions">
                             <Link to="/" className="btn btn-primary">Bosh sahifaga</Link>
                             <Link to="/catalog" className="btn btn-secondary">Xaridni davom ettirish</Link>

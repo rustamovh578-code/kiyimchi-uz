@@ -2,17 +2,18 @@ import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { SlidersHorizontal, Grid3X3, List, X, ChevronDown } from 'lucide-react';
 import ProductCard from '../components/product/ProductCard';
-import products, { searchProducts, getProductsByCategory } from '../data/products';
-import { categories } from '../data/categories';
+import { productsAPI, categoriesAPI } from '../services/api';
 import './CatalogPage.css';
 
 const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
-const seasons = ['Barcha mavsumlar', 'Yoz', 'Qish', 'Bahor/Kuz', 'Kuz/Qish'];
 
 export default function CatalogPage() {
     const [searchParams, setSearchParams] = useSearchParams();
     const [showFilters, setShowFilters] = useState(false);
     const [viewMode, setViewMode] = useState('grid');
+    const [allProducts, setAllProducts] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     const categoryFilter = searchParams.get('category') || '';
     const searchQuery = searchParams.get('search') || '';
@@ -20,42 +21,36 @@ export default function CatalogPage() {
     const [selectedSizes, setSelectedSizes] = useState([]);
     const [priceRange, setPriceRange] = useState([0, 2500000]);
 
+    // Fetch categories
+    useEffect(() => {
+        categoriesAPI.getAll().then(setCategories).catch(console.error);
+    }, []);
+
+    // Fetch products when filters change
+    useEffect(() => {
+        setLoading(true);
+        const params = {};
+        if (categoryFilter) params.category = categoryFilter;
+        if (searchQuery) params.search = searchQuery;
+        if (sortBy) {
+            const sortMap = { 'price-asc': 'price_asc', 'price-desc': 'price_desc', 'new': 'new', 'popular': 'rating' };
+            params.sort = sortMap[sortBy] || '';
+        }
+        productsAPI.getAll(params)
+            .then(data => setAllProducts(data))
+            .catch(console.error)
+            .finally(() => setLoading(false));
+    }, [categoryFilter, searchQuery, sortBy]);
+
+    // Client-side filtering for sizes and price (instant UX)
     const filteredProducts = useMemo(() => {
-        let result = [...products];
-
-        if (searchQuery) {
-            result = searchProducts(searchQuery);
-        }
-
-        if (categoryFilter) {
-            result = result.filter(p => p.category === categoryFilter || p.subcategory === categoryFilter);
-        }
-
+        let result = [...allProducts];
         if (selectedSizes.length > 0) {
             result = result.filter(p => p.sizes.some(s => selectedSizes.includes(s)));
         }
-
         result = result.filter(p => p.price >= priceRange[0] && p.price <= priceRange[1]);
-
-        switch (sortBy) {
-            case 'price-asc':
-                result.sort((a, b) => a.price - b.price);
-                break;
-            case 'price-desc':
-                result.sort((a, b) => b.price - a.price);
-                break;
-            case 'new':
-                result.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
-                break;
-            case 'popular':
-                result.sort((a, b) => b.rating - a.rating);
-                break;
-            default:
-                break;
-        }
-
         return result;
-    }, [categoryFilter, searchQuery, sortBy, selectedSizes, priceRange]);
+    }, [allProducts, selectedSizes, priceRange]);
 
     const toggleSize = (size) => {
         setSelectedSizes(prev =>

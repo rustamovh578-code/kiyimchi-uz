@@ -1,22 +1,37 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, Search, Edit, Trash2, X } from 'lucide-react';
-import products, { formatPrice } from '../../data/products';
-import { categories } from '../../data/categories';
+import { adminAPI, categoriesAPI } from '../../services/api';
 import './AdminPages.css';
 
+const formatPrice = (price) => new Intl.NumberFormat('uz-UZ').format(price) + " so'm";
+
 export default function ProductsManagePage() {
-    const [productList, setProductList] = useState(products);
+    const [productList, setProductList] = useState([]);
+    const [categories, setCategories] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [editProduct, setEditProduct] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        Promise.all([adminAPI.getProducts(), categoriesAPI.getAll()])
+            .then(([p, c]) => { setProductList(p); setCategories(c); })
+            .catch(console.error)
+            .finally(() => setLoading(false));
+    }, []);
 
     const filtered = productList.filter(p =>
         p.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    const handleDelete = (id) => {
+    const handleDelete = async (id) => {
         if (confirm("O'chirishni tasdiqlaysizmi?")) {
-            setProductList(prev => prev.filter(p => p.id !== id));
+            try {
+                await adminAPI.deleteProduct(id);
+                setProductList(prev => prev.filter(p => p.id !== id));
+            } catch (err) {
+                alert(err.message);
+            }
         }
     };
 
@@ -24,6 +39,8 @@ export default function ProductsManagePage() {
         setEditProduct(product);
         setShowModal(true);
     };
+
+    if (loading) return <div className="admin-page"><p>Yuklanmoqda...</p></div>;
 
     return (
         <div className="admin-page animate-fade-in">
@@ -35,11 +52,7 @@ export default function ProductsManagePage() {
                 <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                     <div className="admin-search">
                         <Search size={16} />
-                        <input
-                            placeholder="Qidirish..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
+                        <input placeholder="Qidirish..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
                     </div>
                     <button className="btn btn-primary btn-sm" onClick={() => { setEditProduct(null); setShowModal(true); }}>
                         <Plus size={16} /> Qo'shish
@@ -50,14 +63,7 @@ export default function ProductsManagePage() {
             <div className="admin-table-wrapper">
                 <table className="admin-table">
                     <thead>
-                        <tr>
-                            <th>Tovar</th>
-                            <th>Kategoriya</th>
-                            <th>Narx</th>
-                            <th>Qoldiq</th>
-                            <th>Holat</th>
-                            <th>Amallar</th>
-                        </tr>
+                        <tr><th>Tovar</th><th>Kategoriya</th><th>Narx</th><th>Qoldiq</th><th>Holat</th><th>Amallar</th></tr>
                     </thead>
                     <tbody>
                         {filtered.map(product => (
@@ -67,9 +73,7 @@ export default function ProductsManagePage() {
                                         <img src={product.images[0]} alt="" />
                                         <div>
                                             <strong>{product.name}</strong>
-                                            <div style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>
-                                                KUZ-{String(product.id).padStart(4, '0')}
-                                            </div>
+                                            <div style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>KUZ-{String(product.id).padStart(4, '0')}</div>
                                         </div>
                                     </div>
                                 </td>
@@ -80,9 +84,9 @@ export default function ProductsManagePage() {
                                 </td>
                                 <td>
                                     <strong>{formatPrice(product.price)}</strong>
-                                    {product.oldPrice && (
+                                    {(product.oldPrice || product.old_price) && (
                                         <div style={{ fontSize: '12px', textDecoration: 'line-through', color: 'var(--text-tertiary)' }}>
-                                            {formatPrice(product.oldPrice)}
+                                            {formatPrice(product.oldPrice || product.old_price)}
                                         </div>
                                     )}
                                 </td>
@@ -98,12 +102,8 @@ export default function ProductsManagePage() {
                                 </td>
                                 <td>
                                     <div style={{ display: 'flex', gap: '8px' }}>
-                                        <button className="btn btn-ghost btn-sm" onClick={() => handleEdit(product)}>
-                                            <Edit size={14} />
-                                        </button>
-                                        <button className="btn btn-ghost btn-sm" onClick={() => handleDelete(product.id)} style={{ color: 'var(--color-error)' }}>
-                                            <Trash2 size={14} />
-                                        </button>
+                                        <button className="btn btn-ghost btn-sm" onClick={() => handleEdit(product)}><Edit size={14} /></button>
+                                        <button className="btn btn-ghost btn-sm" onClick={() => handleDelete(product.id)} style={{ color: 'var(--color-error)' }}><Trash2 size={14} /></button>
                                     </div>
                                 </td>
                             </tr>
@@ -112,7 +112,6 @@ export default function ProductsManagePage() {
                 </table>
             </div>
 
-            {/* Modal */}
             {showModal && (
                 <div className="admin-modal-overlay" onClick={() => setShowModal(false)}>
                     <div className="admin-modal" onClick={(e) => e.stopPropagation()}>
@@ -132,7 +131,7 @@ export default function ProductsManagePage() {
                                 </div>
                                 <div className="input-group">
                                     <label>Eski narx (ixtiyoriy)</label>
-                                    <input className="input" type="number" defaultValue={editProduct?.oldPrice || ''} placeholder="0" />
+                                    <input className="input" type="number" defaultValue={editProduct?.oldPrice || editProduct?.old_price || ''} placeholder="0" />
                                 </div>
                             </div>
                             <div className="input-group">

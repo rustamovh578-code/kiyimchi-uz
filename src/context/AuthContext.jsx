@@ -1,8 +1,10 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import { authAPI, setToken } from '../services/api';
 
 const AuthContext = createContext();
 
 const AUTH_STORAGE_KEY = 'kiyimchi_user';
+const TOKEN_KEY = 'kiyimchi_token';
 
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(() => {
@@ -13,6 +15,7 @@ export function AuthProvider({ children }) {
             return null;
         }
     });
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         if (user) {
@@ -22,31 +25,45 @@ export function AuthProvider({ children }) {
         }
     }, [user]);
 
-    const login = (phone, password) => {
-        // Mock login
-        const mockUser = {
-            id: 1,
-            name: 'Foydalanuvchi',
-            phone,
-            role: phone === '+998901111111' ? 'admin' : 'customer',
-        };
-        setUser(mockUser);
-        return mockUser;
+    // Verify token on mount
+    useEffect(() => {
+        const token = localStorage.getItem(TOKEN_KEY);
+        if (token && user) {
+            authAPI.me().catch(() => {
+                // Token expired or invalid
+                setUser(null);
+                setToken(null);
+            });
+        }
+    }, []);
+
+    const login = async (phone, password) => {
+        setLoading(true);
+        try {
+            const data = await authAPI.login(phone, password);
+            setToken(data.token);
+            setUser(data.user);
+            return data.user;
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const register = (name, phone, password) => {
-        const mockUser = {
-            id: Date.now(),
-            name,
-            phone,
-            role: 'customer',
-        };
-        setUser(mockUser);
-        return mockUser;
+    const register = async (name, phone, password) => {
+        setLoading(true);
+        try {
+            const data = await authAPI.register(name, phone, password);
+            setToken(data.token);
+            setUser(data.user);
+            return data.user;
+        } finally {
+            setLoading(false);
+        }
     };
 
     const logout = () => {
         setUser(null);
+        setToken(null);
     };
 
     const isAdmin = user?.role === 'admin';
@@ -57,6 +74,7 @@ export function AuthProvider({ children }) {
             user,
             isAuthenticated,
             isAdmin,
+            loading,
             login,
             register,
             logout,

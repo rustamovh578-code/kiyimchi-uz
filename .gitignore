@@ -1,4 +1,12 @@
-# Logs
+# Dependencies
+node_modules
+server/node_modules
+
+# Environment
+server/.env
+
+# Database
+server/db/*.db
 logs
 *.log
 npm-debug.log*

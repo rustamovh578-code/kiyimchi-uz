@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ChevronLeft, ChevronRight, Truck, Shield, RotateCcw, Headphones } from 'lucide-react';
 import ProductCard from '../components/product/ProductCard';
-import { categories } from '../data/categories';
-import { getNewProducts, getPopularProducts } from '../data/products';
+import { productsAPI, categoriesAPI } from '../services/api';
 import './HomePage.css';
 
 const banners = [
@@ -48,8 +47,15 @@ const features = [
 
 export default function HomePage() {
     const [currentBanner, setCurrentBanner] = useState(0);
-    const newProducts = getNewProducts();
-    const popularProducts = getPopularProducts();
+    const [newProducts, setNewProducts] = useState([]);
+    const [popularProducts, setPopularProducts] = useState([]);
+    const [categories, setCategories] = useState([]);
+
+    useEffect(() => {
+        productsAPI.getAll({ isNew: 'true' }).then(setNewProducts).catch(console.error);
+        productsAPI.getAll({ isPopular: 'true', sort: 'rating' }).then(setPopularProducts).catch(console.error);
+        categoriesAPI.getAll().then(setCategories).catch(console.error);
+    }, []);
 
     useEffect(() => {
         const timer = setInterval(() => {
