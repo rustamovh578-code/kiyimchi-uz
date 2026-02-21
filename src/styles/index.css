@@ -510,3 +510,12 @@ h6 {
     white-space: nowrap;
     border-width: 0;
 }
+
+/* ========== Telegram Mini App ========== */
+body.telegram-webapp {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+body.telegram-webapp .footer {
+    padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
+}

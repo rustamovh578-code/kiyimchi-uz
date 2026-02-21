@@ -1,11 +1,25 @@
-import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Minus, Plus, Trash2, ShoppingBag, ArrowRight } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useTelegram } from '../context/TelegramContext';
 import { formatPrice } from '../data/products';
 import './CartPage.css';
 
 export default function CartPage() {
     const { cart, cartTotal, deliveryFee, removeFromCart, updateQuantity, clearCart } = useCart();
+    const { isTelegram, showMainButton, haptic } = useTelegram();
+    const navigate = useNavigate();
+
+    // Telegram MainButton
+    useEffect(() => {
+        if (!isTelegram || cart.length === 0) return;
+        const total = formatPrice(cartTotal + deliveryFee);
+        return showMainButton(`Buyurtma berish — ${total}`, () => {
+            haptic('impact', 'medium');
+            navigate('/checkout');
+        });
+    }, [isTelegram, cart, cartTotal, deliveryFee, showMainButton, haptic, navigate]);
 
     if (cart.length === 0) {
         return (

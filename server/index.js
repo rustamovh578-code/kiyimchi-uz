@@ -7,6 +7,7 @@ import productsRoutes from './routes/products.js';
 import categoriesRoutes from './routes/categories.js';
 import ordersRoutes from './routes/orders.js';
 import adminRoutes from './routes/admin.js';
+import telegramRoutes from './routes/telegram.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -27,6 +28,7 @@ app.use('/api/products', productsRoutes);
 app.use('/api/categories', categoriesRoutes);
 app.use('/api/orders', ordersRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/telegram', telegramRoutes);
 
 // Root route
 app.get('/', (req, res) => {

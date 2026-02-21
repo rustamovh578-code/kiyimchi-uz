@@ -4,6 +4,7 @@ import { Search, ShoppingBag, User, Menu, X, Sun, Moon, ChevronDown } from 'luci
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useTelegram } from '../../context/TelegramContext';
 import { categories } from '../../data/categories';
 import './Header.css';
 
@@ -15,6 +16,7 @@ export default function Header() {
     const { cartCount } = useCart();
     const { isAuthenticated, isAdmin } = useAuth();
     const { theme, toggleTheme } = useTheme();
+    const { isTelegram } = useTelegram();
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -90,10 +92,12 @@ export default function Header() {
                                 <Search size={20} />
                             </button>
 
-                            {/* Theme Toggle */}
-                            <button className="header__action-btn" onClick={toggleTheme} title={theme === 'light' ? 'Qorong\'u rejim' : 'Yorug\' rejim'}>
-                                {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
-                            </button>
+                            {/* Theme Toggle - Telegram da yashirish */}
+                            {!isTelegram && (
+                                <button className="header__action-btn" onClick={toggleTheme} title={theme === 'light' ? 'Qorong\'u rejim' : 'Yorug\' rejim'}>
+                                    {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+                                </button>
+                            )}
 
                             {/* Cart */}
                             <Link to="/cart" className="header__action-btn header__cart-btn">
@@ -101,15 +105,19 @@ export default function Header() {
                                 {cartCount > 0 && <span className="header__cart-badge">{cartCount}</span>}
                             </Link>
 
-                            {/* Profile */}
-                            <Link to={isAuthenticated ? (isAdmin ? '/admin' : '/profile') : '/login'} className="header__action-btn">
-                                <User size={20} />
-                            </Link>
+                            {/* Profile - Telegram da yashirish */}
+                            {!isTelegram && (
+                                <Link to={isAuthenticated ? (isAdmin ? '/admin' : '/profile') : '/login'} className="header__action-btn">
+                                    <User size={20} />
+                                </Link>
+                            )}
 
-                            {/* Mobile Menu Toggle */}
-                            <button className="header__menu-toggle" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-                                {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-                            </button>
+                            {/* Mobile Menu Toggle - Telegram da yashirish */}
+                            {!isTelegram && (
+                                <button className="header__menu-toggle" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+                                    {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>

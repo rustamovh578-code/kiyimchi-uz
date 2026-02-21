@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { MapPin, CreditCard, Check } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import { useTelegram } from '../context/TelegramContext';
 import { ordersAPI } from '../services/api';
 import './CheckoutPage.css';
 
@@ -18,11 +19,15 @@ export default function CheckoutPage() {
     const navigate = useNavigate();
     const { cart, cartTotal, deliveryFee, clearCart } = useCart();
     const { isAuthenticated, user } = useAuth();
+    const { isTelegram, user: tgUser, showMainButton, haptic, close } = useTelegram();
     const [orderPlaced, setOrderPlaced] = useState(false);
     const [orderId, setOrderId] = useState('');
 
+    // Telegram foydalanuvchi ma'lumotlarini oldindan to'ldirish
+    const defaultName = tgUser ? `${tgUser.firstName} ${tgUser.lastName}`.trim() : (user?.name || '');
+
     const [form, setForm] = useState({
-        name: user?.name || '',
+        name: defaultName,
         phone: user?.phone || '',
         region: '',
         district: '',
