@@ -50,11 +50,29 @@ export default function HomePage() {
     const [newProducts, setNewProducts] = useState([]);
     const [popularProducts, setPopularProducts] = useState([]);
     const [categories, setCategories] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        productsAPI.getAll({ isNew: 'true' }).then(setNewProducts).catch(console.error);
-        productsAPI.getAll({ isPopular: 'true', sort: 'rating' }).then(setPopularProducts).catch(console.error);
-        categoriesAPI.getAll().then(setCategories).catch(console.error);
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                const [newP, popP, cats] = await Promise.all([
+                    productsAPI.getAll({ isNew: 'true' }),
+                    productsAPI.getAll({ isPopular: 'true', sort: 'rating' }),
+                    categoriesAPI.getAll(),
+                ]);
+                setNewProducts(newP);
+                setPopularProducts(popP);
+                setCategories(cats);
+            } catch (err) {
+                console.error('API error:', err);
+                // Retry after 3 seconds (Render free tier may be waking up)
+                setTimeout(fetchData, 3000);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchData();
     }, []);
 
     useEffect(() => {
@@ -137,22 +155,29 @@ export default function HomePage() {
                             <p className="section-subtitle">Siz uchun eng yaxshi tanlov</p>
                         </div>
                     </div>
-                    <div className="categories-grid">
-                        {categories.map((cat, i) => (
-                            <Link
-                                key={cat.id}
-                                to={`/catalog?category=${cat.id}`}
-                                className="category-card animate-fade-in-up"
-                                style={{ animationDelay: `${i * 100}ms` }}
-                            >
-                                <img src={cat.image} alt={cat.name} className="category-card__image" loading="lazy" />
-                                <div className="category-card__overlay">
-                                    <h3 className="category-card__name">{cat.name}</h3>
-                                    <span className="category-card__count">{cat.subcategories.length} sub-kategoriya</span>
-                                </div>
-                            </Link>
-                        ))}
-                    </div>
+                    {loading && categories.length === 0 ? (
+                        <div style={{ textAlign: 'center', padding: '2rem' }}>
+                            <div className="loading-spinner" />
+                            <p style={{ marginTop: '1rem', color: 'var(--text-tertiary)' }}>Yuklanmoqda...</p>
+                        </div>
+                    ) : (
+                        <div className="categories-grid">
+                            {categories.map((cat, i) => (
+                                <Link
+                                    key={cat.id}
+                                    to={`/catalog?category=${cat.id}`}
+                                    className="category-card animate-fade-in-up"
+                                    style={{ animationDelay: `${i * 100}ms` }}
+                                >
+                                    <img src={cat.image} alt={cat.name} className="category-card__image" loading="lazy" />
+                                    <div className="category-card__overlay">
+                                        <h3 className="category-card__name">{cat.name}</h3>
+                                        <span className="category-card__count">{cat.subcategories.length} sub-kategoriya</span>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </section>
 
