@@ -25,7 +25,7 @@ const products = [
     {
         id: 3, name: "Qishki Kurtka Premium", category: 'men', subcategory: 'men-jackets',
         price: 799000, old_price: 950000,
-        images: JSON.stringify(['https://images.unsplash.com/photo-1544923246-77307dd270b5?w=600&q=80', 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=600&q=80']),
+        images: JSON.stringify(['https://images.unsplash.com/photo-1551028719-00167b16eac5?w=600&q=80', 'https://images.unsplash.com/photo-1548883354-7622d03aca27?w=600&q=80']),
         colors: JSON.stringify(['#1A1A2E', '#2C5F2D', '#8B4513']), color_names: JSON.stringify(['Qora', 'Yashil', 'Jigarrang']),
         sizes: JSON.stringify(['M', 'L', 'XL', 'XXL']),
         description: "Issiq va bardoshli qishki kurtka. Shamol va sovuqdan himoya qiladi.",
